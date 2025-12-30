@@ -1,0 +1,40 @@
+0: Grid Inn Hotel
+1: Grid Inn Hotel
+2: 9-6, Jong-ro 18 gil
+3: 03192 Seoul
+4: 숙소
+5: ID
+6: 2087141
+7: Booking.com B.V.
+8: P.O. Box 1639
+9: 1000 BP Amsterdam
+10: The Netherlands
+11: VAT Number: NL805734958B01
+12: Registered in the Netherlands
+13: No. 31047344
+14: www.booking.com
+15: 대금
+16: 지급
+17: 명세서
+18: 대금
+19: 지급
+20: 날짜
+21: 2025
+22: 년
+23: 12
+24: 월
+25: 1
+26: 일
+27: 대금
+28: 지급
+29: ID
+30: 010634182308
+31: 유형
+32: 참조
+33: 번호
+34: 유형
+35: 체크인
+36: 체크아웃
+37: 투숙객
+38: 이름
+39: 통화
