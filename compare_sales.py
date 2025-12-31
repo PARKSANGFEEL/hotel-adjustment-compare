@@ -49,7 +49,17 @@ dir_base = os.path.dirname(os.path.abspath(__file__))
 directory_ota = os.path.join(dir_base, 'ota-adjustment')
 
 # 결과 엑셀 파일에서만 데이터 로드
+
+# 결과파일이 없으면 전체고객 목록 파일을 복사해서 생성
 result_path = os.path.join(dir_base, '매출_검토_결과.xlsx')
+if not os.path.exists(result_path):
+    import glob
+    import shutil
+    all_list = sorted(glob.glob(os.path.join(dir_base, '전체고객 목록_*.xlsx')))
+    if not all_list:
+        raise FileNotFoundError('전체고객 목록_*.xlsx 파일이 없습니다. 결과파일을 생성할 수 없습니다.')
+    latest_all = all_list[-1]
+    shutil.copy(latest_all, result_path)
 df_all = pd.read_excel(result_path, sheet_name=0)
 
 # 컬럼명 매핑 (자동 추출)
