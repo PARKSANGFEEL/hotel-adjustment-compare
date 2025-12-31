@@ -200,6 +200,8 @@ for name, rows in grouped_rows.items():
                 price2_f = float(price2)
             except:
                 price2_f = None
+            # 합계 우선, 없으면 객실료
+            use_price = price2_f if price2_f else price1_f
             # 이름이 일치하는 Remittances 행 찾기
             match = df_ota[df_ota[col_name_ota].astype(str).str.strip() == name]
             if not match.empty:
@@ -221,7 +223,7 @@ for name, rows in grouped_rows.items():
                             for fname, df, offset in ota_file_map:
                                 if offset <= abs_idx < offset + len(df):
                                     file_row = abs_idx - offset + 2  # 2: 엑셀 헤더 보정
-                                    log_info = [name, idx+2, price1, fname, file_row, str(match_row[price_col])]
+                                    log_info = [name, idx+2, use_price, fname, file_row, str(match_row[price_col])]
                                     break
                     if price_match:
                         break
@@ -237,6 +239,9 @@ for name, rows in grouped_rows.items():
                         cell.font = font_red
                     if log_info:
                         log_ws.append(log_info)
+                    else:
+                        # log_info가 None인 경우에도 비교로그에 한 줄 남김
+                        log_ws.append([name, idx+2, use_price, '-', '-', '불일치'])
     # Remittances에 없는 고객명은 아무 표시도 하지 않음
 
 
