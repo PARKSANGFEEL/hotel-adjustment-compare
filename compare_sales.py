@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+import sys
+import io
+
+# Windows 콘솔 인코딩 문제 해결
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 # ...기존 코드...
 
@@ -82,6 +88,21 @@ for file in ota_files:
     path = os.path.join(directory_ota, file)
     temp_df = pd.read_excel(path)
     df_ota = pd.concat([df_ota, temp_df], ignore_index=True)
+
+# 부킹 CSV 파일 읽기
+booking_files = [f for f in os.listdir(directory_ota) if f.startswith('부킹') and f.endswith('.csv')]
+df_booking = pd.DataFrame()
+for file in booking_files:
+    path = os.path.join(directory_ota, file)
+    temp_df = pd.read_csv(path)
+    df_booking = pd.concat([df_booking, temp_df], ignore_index=True)
+
+# 부킹 데이터 구조: B열=예약번호, I열=가격
+if not df_booking.empty:
+    # 예약번호를 문자열로 변환 (FutureWarning 방지)
+    df_booking[df_booking.columns[1]] = df_booking.iloc[:, 1].astype(str).str.strip()
+    # 금액 컬럼 (I열 = 인덱스 8)
+    booking_price_col = df_booking.columns[8] if len(df_booking.columns) > 8 else None
 
 
 
@@ -253,6 +274,181 @@ for name, rows in grouped_rows.items():
                         log_ws.append([name, idx+2, use_price, '-', '-', '불일치', '-'])
     # Remittances에 없는 고객명은 아무 표시도 하지 않음
 
+
+# 부킹닷컴 비교 처리
+print("\n" + "="*80)
+print("부킹닷컴 비교 시작")
+print("="*80)
+matched_booking_refs = {}
+
+# 1단계: 부킹닷컴 예약번호별 그룹화 (앞 10자리 기준)
+booking_grouped_by_ref = defaultdict(list)
+booking_grouped_rows = defaultdict(list)
+for idx, row in df_all.iterrows():
+    vendor = str(row.get('거래처', '')).strip()
+    if vendor != '부킹닷컴':
+        continue
+    name = str(row.get(col_name_all, '')).strip()
+    ota_no = str(row.get(col_ota_no, '')).strip()[:10]
+    price1 = str(row.get(col_price_all_1, '')).replace(',', '').strip()
+    price2 = str(row.get(col_price_all_2, '')).replace(',', '').strip()
+    try:
+        price1_f = float(price1)
+    except:
+        price1_f = 0.0
+    try:
+        price2_f = float(price2)
+    except:
+        price2_f = 0.0
+    use_price = price2_f if price2_f else price1_f
+    
+    # 예약번호별 그룹화
+    if ota_no:
+        booking_grouped_by_ref[ota_no].append((idx, use_price, name))
+    # 고객명별 그룹화 (백업용)
+    booking_grouped_rows[name].append((idx, use_price))
+
+print(f"\n[1단계] 전체고객목록에서 부킹닷컴 예약번호 {len(booking_grouped_by_ref)}개, 고객 {len(booking_grouped_rows)}명 그룹화 완료")
+
+# 2단계: 부킹 데이터 수집
+booking_by_ref = {}
+if not df_booking.empty:
+    print(f"\n[2단계] 부킹 CSV 파일 데이터 읽기 시작 (총 {len(df_booking)}행)")
+    print(f"부킹 CSV 컬럼: {list(df_booking.columns[:10])}")
+    
+    for b_idx, b_row in df_booking.iterrows():
+        try:
+            b_ref = str(b_row.iloc[1]).strip()
+            if booking_price_col and booking_price_col in df_booking.columns:
+                b_price = float(str(b_row[booking_price_col]).replace(',', '').strip())
+            else:
+                b_price = float(str(b_row.iloc[8]).replace(',', '').strip())
+            booking_by_ref[b_ref] = round(b_price * 0.82)
+        except:
+            continue
+
+print("\n[3단계] 예약번호 기준 그룹 합산 매칭 시작")
+used_booking_refs = set()
+group_matched_count = 0
+matched_rows = set()
+
+for ref_no, rows in booking_grouped_by_ref.items():
+    total_price = sum(price for _, price, _ in rows)
+    found = False
+    
+    customer_names = ', '.join(set(name for _, _, name in rows))
+    print(f"\n예약번호: {ref_no} (고객명: {customer_names})")
+    print(f"  전체고객목록 행 수: {len(rows)}, 가격 합계: {total_price}")
+    print(f"  부킹 데이터 가격: {booking_by_ref.get(ref_no, 'N/A')}")
+    print(f"  부킹 데이터 가격: {booking_by_ref.get(ref_no, 'N/A')}")
+    
+    if ref_no in booking_by_ref and round(total_price) == booking_by_ref[ref_no]:
+        found = True
+        used_booking_refs.add(ref_no)
+        print(f"  [OK] 예약번호 그룹 합산 매칭 성공! (전체고객목록 합계: {total_price} = 부킹 가격: {booking_by_ref[ref_no]})")
+    
+    if found:
+        group_matched_count += 1
+        for idx, _, _ in rows:
+            matched_rows.add(idx)
+            for cell in ws[idx+2]:
+                cell.fill = fill_yellow
+        print(f"  → {len(rows)}개 행 모두 노란색 표시")
+    else:
+        print(f"  [SKIP] 예약번호 그룹 합산 매칭 실패")
+
+print(f"\n[완료] 예약번호 기준 그룹 합산 매칭: {group_matched_count}건, {len(matched_rows)}개 행 처리됨")
+
+# 4단계: 매칭되지 않은 행에 대해 개별 행 매칭
+print("\n[4단계] 개별 행 매칭 시작 (그룹 합산 실패한 행만)")
+for name, rows in booking_grouped_rows.items():
+    for idx, _ in rows:
+        if idx in matched_rows:
+            continue
+        
+        row = df_all.iloc[idx]
+        vendor = str(row.get('거래처', '')).strip()
+        if vendor != '부킹닷컴':
+            continue
+        
+        ws_row = idx + 2
+        name = str(row.get(col_name_all, '')).strip()
+        ota_no = str(row.get(col_ota_no, '')).strip()[:10]
+        price1 = str(row.get(col_price_all_1, '')).replace(',', '').strip()
+        price2 = str(row.get(col_price_all_2, '')).replace(',', '').strip()
+        
+        try:
+            price1_f = float(price1)
+        except:
+            price1_f = None
+        try:
+            price2_f = float(price2)
+        except:
+            price2_f = None
+        
+        use_price = price2_f if price2_f else price1_f
+        if use_price is None:
+            continue
+        
+        if df_booking.empty:
+            continue
+        
+        booking_match = df_booking[df_booking[df_booking.columns[1]] == ota_no]
+        
+        print(f"  행 {ws_row}: OTA번호={ota_no}, 가격={use_price}, 부킹매칭={len(booking_match)}건")
+        
+        if booking_match.empty:
+            print(f"    → 부킹 데이터에 예약번호 없음 (표시 없음)")
+            continue
+        
+        price_match = False
+        log_info = None
+        
+        for b_idx, b_row in booking_match.iterrows():
+            try:
+                if booking_price_col and booking_price_col in df_booking.columns:
+                    booking_price = float(str(b_row[booking_price_col]).replace(',', '').strip())
+                else:
+                    booking_price = float(str(b_row.iloc[8]).replace(',', '').strip())
+                
+                booking_price_adjusted = round(booking_price * 0.82)
+                
+                print(f"    부킹원가={booking_price}, 조정가격(×0.82)={booking_price_adjusted}, 비교={round(use_price)}")
+                
+                if round(use_price) == booking_price_adjusted:
+                    price_match = True
+                    matched_booking_refs[ota_no] = matched_booking_refs.get(ota_no, 0) + 1
+                    print(f"    [OK] 개별 행 매칭 성공!")
+                    break
+                else:
+                    if log_info is None:
+                        booking_file_name = booking_files[0] if booking_files else '부킹파일'
+                        log_info = [name, ws_row, use_price, booking_file_name, b_idx+2, str(booking_price_adjusted), str(booking_price)]
+            except Exception as e:
+                print(f"    오류: {e}")
+                continue
+        
+        if price_match:
+            for cell in ws[ws_row]:
+                cell.fill = fill_yellow
+            print(f"    → 노란색 표시")
+        else:
+            if matched_booking_refs.get(ota_no, 0) > 0:
+                matched_booking_refs[ota_no] -= 1
+                print(f"    → 이미 매칭됨 (표시 없음)")
+                continue
+            
+            for cell in ws[ws_row]:
+                cell.font = font_red
+            print(f"    [ERROR] 불일치 - 빨간색 표시 + 비교로그 기록")
+            
+            if log_info:
+                log_ws.append(log_info)
+            else:
+                log_ws.append([name, ws_row, use_price, '-', '-', '불일치', '-'])
+
+print(f"\n[완료] 부킹닷컴 비교 완료")
+print("="*80)
 
 # 결과 저장
 result_path = os.path.join(dir_base, '매출_검토_결과.xlsx')
