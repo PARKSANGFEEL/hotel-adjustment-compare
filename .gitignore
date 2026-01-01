@@ -13,6 +13,7 @@ __pycache__/
 # OTA 데이터
 ota-adjustment/*.pdf
 ota-adjustment/*.csv
+!ota-adjustment/부킹*.csv
 
 # 테스트 및 임시 파일
 *.txt
