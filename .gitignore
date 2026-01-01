@@ -1,0 +1,19 @@
+# 엑셀 데이터 파일
+*.xlsx
+~$*.xlsx
+
+# Python 캐시
+__pycache__/
+*.pyc
+*.pyo
+
+# 결과 파일
+매출_검토_결과.xlsx
+
+# OTA 데이터
+ota-adjustment/*.pdf
+ota-adjustment/*.csv
+
+# 테스트 및 임시 파일
+*.txt
+!requirements.txt
