@@ -1,9 +1,37 @@
 # -*- coding: utf-8 -*-
 import sys
 import io
+import argparse
 
 # Windows 콘솔 인코딩 문제 해결
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
+# 명령행 인자 파싱
+parser = argparse.ArgumentParser(description='호텔 매출 비교 프로그램')
+parser.add_argument('--download-expedia', action='store_true', help='Expedia 명세서 자동 다운로드 실행')
+parser.add_argument('--expedia-start-date', help='Expedia 다운로드 시작 날짜 (YYYY-MM-DD)')
+parser.add_argument('--expedia-end-date', help='Expedia 다운로드 종료 날짜 (YYYY-MM-DD)')
+args = parser.parse_args()
+
+# Expedia 다운로드 옵션 처리
+if args.download_expedia:
+    print("\n" + "="*80)
+    print("Expedia 명세서 다운로드 옵션 활성화")
+    print("="*80)
+    try:
+        from expedia_downloader import ExpediaDownloader
+        
+        downloader = ExpediaDownloader(base_dir=os.path.dirname(os.path.abspath(__file__)))
+        count = downloader.run(
+            start_date=args.expedia_start_date,
+            end_date=args.expedia_end_date
+        )
+        
+        print(f"\n[결과] {count}개 Expedia 명세서 다운로드 완료\n")
+    except Exception as e:
+        print(f"\n[ERROR] Expedia 다운로드 실패: {e}\n")
+        import traceback
+        traceback.print_exc()
 
 # ...기존 코드...
 
@@ -104,6 +132,21 @@ if not df_booking.empty:
     # 금액 컬럼 (I열 = 인덱스 8)
     booking_price_col = df_booking.columns[8] if len(df_booking.columns) > 8 else None
 
+# 익스피디아 CSV 파일 읽기
+expedia_files = [f for f in os.listdir(directory_ota) if f.startswith('익스피디아') and f.endswith('.csv')]
+df_expedia = pd.DataFrame()
+for file in expedia_files:
+    path = os.path.join(directory_ota, file)
+    temp_df = pd.read_csv(path)
+    df_expedia = pd.concat([df_expedia, temp_df], ignore_index=True)
+
+# 익스피디아 데이터 구조: A열=예약번호, F열=처리금액
+if not df_expedia.empty:
+    # 예약번호를 문자열로 변환 (FutureWarning 방지)
+    df_expedia[df_expedia.columns[0]] = df_expedia.iloc[:, 0].astype(str).str.strip()
+    # 금액 컬럼 (F열 = 인덱스 5)
+    expedia_price_col = df_expedia.columns[5] if len(df_expedia.columns) > 5 else None
+
 
 
 
@@ -155,6 +198,7 @@ for file in ota_files:
 
 # 색상 스타일 정의
 fill_yellow = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
+fill_blue = PatternFill(start_color='ADD8E6', end_color='ADD8E6', fill_type='solid')
 font_red = Font(color='FF0000')
 
 
@@ -163,7 +207,7 @@ font_red = Font(color='FF0000')
 matched_remit_names = {}
 
 # 1. 전체고객목록에서 아고다인 고객명별로 인덱스와 가격(합계, 객실료) 수집
-grouped_rows = defaultdict(list)
+agoda_grouped_rows = defaultdict(list)
 for idx, row in df_all.iterrows():
     vendor = str(row.get('거래처', '')).strip()
     if vendor != '아고다':
@@ -181,7 +225,7 @@ for idx, row in df_all.iterrows():
         price2_f = 0.0
     # 합계 우선, 없으면 객실료
     use_price = price2_f if price2_f else price1_f
-    grouped_rows[name].append((idx, use_price))
+    agoda_grouped_rows[name].append((idx, use_price))
 
 # 2. Remittances에서 이름별 금액 리스트 수집
 otas_by_name = defaultdict(list)
@@ -196,7 +240,7 @@ for _, row in df_ota.iterrows():
 
 # 3. 매칭 처리
 used_ota_idx = set()
-for name, rows in grouped_rows.items():
+for name, rows in agoda_grouped_rows.items():
     total_price = sum(price for _, price in rows)
     # Remittances에서 해당 이름의 금액 중 합과 일치하는 것 찾기
     found = False
@@ -272,7 +316,12 @@ for name, rows in grouped_rows.items():
                     else:
                         # log_info가 None인 경우에도 비교로그에 한 줄 남김
                         log_ws.append([name, idx+2, use_price, '-', '-', '불일치', '-'])
-    # Remittances에 없는 고객명은 아무 표시도 하지 않음
+            else:
+                # Remittances에 이름이 없음 -> 파란색
+                for cell in ws[idx+2]:
+                    cell.fill = fill_blue
+                # 비교로그에 기록
+                log_ws.append([name, idx+2, use_price, '아고다 데이터 없음', '', '', ''])
 
 
 # 부킹닷컴 비교 처리
@@ -398,7 +447,11 @@ for name, rows in booking_grouped_rows.items():
         print(f"  행 {ws_row}: OTA번호={ota_no}, 가격={use_price}, 부킹매칭={len(booking_match)}건")
         
         if booking_match.empty:
-            print(f"    → 부킹 데이터에 예약번호 없음 (표시 없음)")
+            print(f"    → 부킹 데이터에 예약번호 없음 (파란색 표시)")
+            for cell in ws[ws_row]:
+                cell.fill = fill_blue
+            # 비교로그에 기록
+            log_ws.append([name, ws_row, use_price, '부킹닷컴 데이터 없음', '', '', ''])
             continue
         
         price_match = False
@@ -448,6 +501,119 @@ for name, rows in booking_grouped_rows.items():
                 log_ws.append([name, ws_row, use_price, '-', '-', '불일치', '-'])
 
 print(f"\n[완료] 부킹닷컴 비교 완료")
+print("="*80)
+
+# 익스피디아 비교 처리
+print("\n" + "="*80)
+print("익스피디아 비교 시작")
+print("="*80)
+
+matched_expedia_refs = {}
+expedia_matched_count = 0
+expedia_notfound_count = 0
+expedia_mismatch_count = 0
+
+for idx, row in df_all.iterrows():
+    vendor = str(row.get('거래처', '')).strip()
+    if vendor != '익스피디아':
+        continue
+    
+    ws_row = idx + 2
+    name = str(row.get(col_name_all, '')).strip()
+    ota_no = str(row.get(col_ota_no, '')).strip()
+    price1 = str(row.get(col_price_all_1, '')).replace(',', '').strip()
+    price2 = str(row.get(col_price_all_2, '')).replace(',', '').strip()
+    
+    try:
+        price1_f = float(price1)
+    except:
+        price1_f = None
+    try:
+        price2_f = float(price2)
+    except:
+        price2_f = None
+    
+    use_price = price2_f if price2_f else price1_f
+    if use_price is None:
+        continue
+    
+    if df_expedia.empty:
+        continue
+    
+    # 익스피디아 CSV에서 예약번호 검색
+    expedia_match = df_expedia[df_expedia[df_expedia.columns[0]] == ota_no]
+    
+    print(f"  행 {ws_row}: OTA번호={ota_no}, 가격={use_price}, 익스피디아매칭={len(expedia_match)}건")
+    
+    if expedia_match.empty:
+        # 익스피디아 CSV에 예약번호 없음 -> 파란색
+        print(f"    → 익스피디아 데이터에 예약번호 없음 (파란색 표시)")
+        for cell in ws[ws_row]:
+            cell.fill = fill_blue
+        # 비교로그에 기록
+        log_ws.append([name, ws_row, use_price, '익스피디아 데이터 없음', '', '', ''])
+        expedia_notfound_count += 1
+        continue
+    
+    price_match = False
+    log_info = None
+    
+    for e_idx, e_row in expedia_match.iterrows():
+        try:
+            if expedia_price_col and expedia_price_col in df_expedia.columns:
+                price_str = str(e_row[expedia_price_col])
+            else:
+                price_str = str(e_row.iloc[5])
+            # "KRW 538739" 형식에서 숫자만 추출
+            price_str = re.sub(r'[^\d.]', '', price_str).strip()
+            expedia_price = float(price_str)
+            
+            # 오차 범위 1,000원 이내 허용
+            price_diff = abs(use_price - expedia_price)
+            
+            print(f"    익스피디아가격={expedia_price}, 전체고객목록가격={use_price}, 차이={price_diff}")
+            
+            if price_diff <= 1000:
+                price_match = True
+                matched_expedia_refs[ota_no] = matched_expedia_refs.get(ota_no, 0) + 1
+                print(f"    [OK] 매칭 성공! (오차 {price_diff}원)")
+                break
+            else:
+                if log_info is None:
+                    expedia_file_name = expedia_files[0] if expedia_files else '익스피디아파일'
+                    log_info = [name, ws_row, use_price, expedia_file_name, e_idx+2, str(expedia_price), str(expedia_price)]
+        except Exception as e:
+            print(f"    오류: {e}")
+            continue
+    
+    if price_match:
+        for cell in ws[ws_row]:
+            cell.fill = fill_yellow
+            cell.font = Font()  # 글씨 색상 초기화 (검정색)
+        print(f"    → 노란색 표시")
+        expedia_matched_count += 1
+    else:
+        if matched_expedia_refs.get(ota_no, 0) > 0:
+            matched_expedia_refs[ota_no] -= 1
+            print(f"    → 이미 매칭됨 (표시 없음)")
+            continue
+        
+        # 기존 배경색 제거 후 빨간색 글씨만 표시
+        for cell in ws[ws_row]:
+            cell.fill = PatternFill(fill_type=None)  # 배경색 초기화
+            cell.font = font_red
+        print(f"    [ERROR] 불일치 - 빨간색 표시 + 비교로그 기록")
+        expedia_mismatch_count += 1
+        
+        if log_info:
+            log_ws.append(log_info)
+        else:
+            log_ws.append([name, ws_row, use_price, '-', '-', '불일치', '-'])
+
+print(f"\n[완료] 익스피디아 비교 완료")
+print(f"  ✅ 매칭 성공: {expedia_matched_count}건")
+print(f"  ❌ 가격 불일치: {expedia_mismatch_count}건")
+print(f"  🔵 예약번호 없음: {expedia_notfound_count}건")
 print("="*80)
 
 # 결과 저장

@@ -1023,7 +1023,122 @@ class ExpediaDownloader:
                 time.sleep(2)
         
         print(f"\n[완료] 총 {downloaded_count}/{len(statements_to_download)}개 파일 다운로드 성공")
+        
+        # 다운로드 후 엑셀 업데이트
+        self._update_excel_with_statements(filtered_statements)
+        
         return downloaded_count
+    
+    def _update_excel_with_statements(self, statements):
+        """
+        다운로드한 명세서 정보를 '매출 및 입금결과.xlsx'의 '익스피디아' 시트에 추가
+        
+        Args:
+            statements: 명세서 정보 리스트 (다운로드 대상 전체)
+        """
+        try:
+            from openpyxl import load_workbook, Workbook
+            from datetime import datetime
+            
+            excel_path = self.base_dir / '매출 및 입금 결과.xlsx'
+            
+            print(f"\n[엑셀 경로 확인]")
+            print(f"  base_dir: {self.base_dir}")
+            print(f"  excel_path: {excel_path}")
+            
+            # 폴더 내 엑셀 파일 목록 확인
+            excel_files = list(self.base_dir.glob('*.xlsx'))
+            print(f"  폴더 내 엑셀 파일 ({len(excel_files)}개):")
+            for f in excel_files[:10]:
+                print(f"    - {f.name}")
+            
+            print(f"  파일 존재 여부: {excel_path.exists()}")
+            
+            # 파일이 없으면 새로 생성
+            if not excel_path.exists():
+                print(f"\n[엑셀 생성] {excel_path}")
+                wb = Workbook()
+                # 기본 시트 이름 변경
+                if 'Sheet' in wb.sheetnames:
+                    wb.remove(wb['Sheet'])
+                ws = wb.create_sheet('익스피디아')
+                # 헤더 추가
+                ws.append(['요청날짜', '지불ID', '결제날짜', '처리금액'])
+                wb.save(excel_path)
+                print(f"  [OK] 새 엑셀 파일 생성 완료")
+            else:
+                print(f"\n[엑셀 업데이트] 기존 파일 사용")
+            
+            # 엑셀 파일 로드
+            wb = load_workbook(excel_path)
+            
+            # 익스피디아 시트 확인 또는 생성
+            if '익스피디아' not in wb.sheetnames:
+                ws = wb.create_sheet('익스피디아')
+                # 헤더 추가
+                ws.append(['요청날짜', '지불ID', '결제날짜', '처리금액'])
+                print("  [INFO] '익스피디아' 시트 생성 및 헤더 추가")
+            else:
+                ws = wb['익스피디아']
+            
+            # 기존 지불ID 목록 수집 (B열)
+            existing_payment_ids = set()
+            for row in ws.iter_rows(min_row=2, max_col=2, values_only=True):
+                if row[1]:  # B열 (지불ID)
+                    existing_payment_ids.add(str(row[1]).strip())
+            
+            print(f"  기존 데이터: {len(existing_payment_ids)}건")
+            
+            # 새 데이터 추가
+            added_count = 0
+            for stmt in statements:
+                payment_id = str(stmt.get('paymentRequestId', '')).strip()
+                
+                if not payment_id or payment_id in existing_payment_ids:
+                    continue
+                
+                # 데이터 추출
+                date_requested = stmt.get('dateRequested', '')
+                date_paid = stmt.get('datePaid', '')
+                amount = stmt.get('amountProcessed', 0)
+                
+                # 금액에 쉼표 추가 (천 단위 구분)
+                amount_formatted = f"{amount:,}" if isinstance(amount, (int, float)) else str(amount)
+                
+                # 행 추가
+                ws.append([date_requested, payment_id, date_paid, amount_formatted])
+                existing_payment_ids.add(payment_id)
+                added_count += 1
+            
+            print(f"  새로 추가: {added_count}건")
+            
+            # 요청날짜로 정렬 (최근 날짜 먼저, 헤더 제외)
+            if ws.max_row > 1:
+                data_rows = []
+                for row in ws.iter_rows(min_row=2, max_row=ws.max_row, values_only=True):
+                    data_rows.append(list(row))
+                
+                # 요청날짜(A열, 인덱스 0) 기준 내림차순 정렬
+                data_rows.sort(key=lambda x: x[0] if x[0] else '', reverse=True)
+                
+                # 기존 데이터 삭제 (헤더 제외)
+                ws.delete_rows(2, ws.max_row - 1)
+                
+                # 정렬된 데이터 다시 추가
+                for row_data in data_rows:
+                    ws.append(row_data)
+                
+                print(f"  정렬 완료: 요청날짜 기준 최근순")
+            
+            # 저장
+            wb.save(excel_path)
+            wb.close()
+            print(f"  [OK] 엑셀 저장 완료")
+            
+        except Exception as e:
+            print(f"  [ERROR] 엑셀 업데이트 실패: {e}")
+            import traceback
+            traceback.print_exc()
     
     def close(self):
         """브라우저 종료"""
