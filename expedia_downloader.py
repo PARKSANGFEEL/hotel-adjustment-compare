@@ -880,7 +880,7 @@ class ExpediaDownloader:
                 # 원본 확장자 확인 후 CSV로 변경
                 source_ext = source_file.suffix if source_file.suffix else ''
                 target_ext = '.csv' if source_ext.lower() in {'.txt', ''} else source_ext
-                final_filename = f"익스피디아_{amount}_{date_paid}{target_ext}"
+                final_filename = f"익스피디아_{date_paid}_{amount}{target_ext}"
                 final_path = self.download_dir / final_filename
                 if final_path.exists():
                     final_path.unlink()
@@ -910,7 +910,7 @@ class ExpediaDownloader:
                     source_file = files[0]
                     source_ext = source_file.suffix if source_file.suffix else ''
                     target_ext = '.csv' if source_ext.lower() in {'.txt', ''} else source_ext
-                    final_filename = f"익스피디아_{amount}_{date_paid}{target_ext}"
+                    final_filename = f"익스피디아_{date_paid}_{amount}{target_ext}"
                     final_path = self.download_dir / final_filename
                     if final_path.exists():
                         final_path.unlink()
@@ -984,26 +984,57 @@ class ExpediaDownloader:
         if payment_ids:
             filtered_statements = [s for s in filtered_statements if s.get('paymentRequestId') in payment_ids]
         
+        # 엑셀에 있지만 파일이 없는 명세서 필터링
+        excel_path = self.base_dir / '매출 및 입금 결과.xlsx'
+        excel_records = set()
+        missing_from_excel = set()
+        
+        if excel_path.exists():
+            try:
+                from openpyxl import load_workbook
+                wb_check = load_workbook(excel_path, read_only=True)
+                if '익스피디아' in wb_check.sheetnames:
+                    ws_check = wb_check['익스피디아']
+                    for row in ws_check.iter_rows(min_row=2, values_only=True):
+                        if row[2] and row[3]:  # 결제날짜, 처리금액
+                            date_str = str(row[2]).replace('-', '')
+                            amount_str = str(row[3]).replace(',', '').replace('.0', '').strip()
+                            excel_records.add(f"{date_str}_{amount_str}")
+                    wb_check.close()
+                    print(f"  엑셀 명세서 기록: {len(excel_records)}개")
+            except Exception as e:
+                print(f"  [WARN] 엑셀 읽기 실패: {e}")
+        
         # 이미 저장된 파일 확인 (중복 다운로드 방지)
         existing_files = set()
         for f in self.download_dir.glob('익스피디아_*'):
-            # 익스피디아_4793717_20251229.csv 형식에서 amount_date 추출
-            parts = f.stem.split('_')  # 익스피디아, 4793717, 20251229
+            # 익스피디아_20251229_4793717.csv 형식에서 date_amount 추출
+            parts = f.stem.split('_')  # 익스피디아, 20251229, 4793717
             if len(parts) >= 3:
-                amount_date = f"{parts[1]}_{parts[2]}"
-                existing_files.add(amount_date)
+                date_amount = f"{parts[1]}_{parts[2]}"
+                existing_files.add(date_amount)
         
-        # 이미 저장된 파일은 필터링
+        # 엑셀에는 있지만 파일이 없는 항목 계산
+        missing_from_excel = excel_records - existing_files
+        if missing_from_excel:
+            print(f"  엑셀에 있지만 파일이 없는 명세서: {len(missing_from_excel)}개")
+        
+        # 이미 저장된 파일은 필터링 (엑셀 우선순위)
         statements_to_download = []
         for stmt in filtered_statements:
             amount = int(stmt.get('amountProcessed', 0))
             date_paid = stmt.get('datePaid', '').replace('-', '')
-            amount_date = f"{amount}_{date_paid}"
-            if amount_date not in existing_files:
+            date_amount = f"{date_paid}_{amount}"
+            
+            # 우선순위: 엑셀에는 있지만 파일이 없는 것
+            if date_amount in missing_from_excel:
+                statements_to_download.append(stmt)
+            # 파일이 아예 없는 경우도 추가
+            elif date_amount not in existing_files:
                 statements_to_download.append(stmt)
             else:
                 payment_id = stmt.get('paymentRequestId', '')
-                print(f"  [SKIP] 이미 저장됨: {payment_id} (금액: {amount}, 날짜: {date_paid})")
+                print(f"  [SKIP] 이미 저장됨: {payment_id} (날짜: {date_paid}, 금액: {amount})")
         
         if limit:
             statements_to_download = statements_to_download[:limit]
@@ -1102,8 +1133,9 @@ class ExpediaDownloader:
                 date_paid = stmt.get('datePaid', '')
                 amount = stmt.get('amountProcessed', 0)
                 
-                # 금액에 쉼표 추가 (천 단위 구분)
-                amount_formatted = f"{amount:,}" if isinstance(amount, (int, float)) else str(amount)
+                # 금액을 정수로 변환 후 쉼표 추가 (천 단위 구분)
+                amount_int = int(amount) if isinstance(amount, (int, float)) else 0
+                amount_formatted = f"{amount_int:,}"
                 
                 # 행 추가
                 ws.append([date_requested, payment_id, date_paid, amount_formatted])
@@ -1158,7 +1190,7 @@ if __name__ == '__main__':
         
         if statements:
             print(f"\n총 {len(statements)}개 명세서 발견")
-            # 최신 5개 다운로드
-            downloader.download_statements(limit=5)
+            # 전체 다운로드 (엑셀 기반 필터링으로 필요한 것만 다운로드)
+            downloader.download_statements()
     
     downloader.close()

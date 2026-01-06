@@ -307,7 +307,11 @@ class AgodaDownloader:
             raise
     
     def download_remittance(self, remittance: RemittanceRecord) -> bool:
-        """개별 명세서 다운로드 (Export to Excel)"""
+        """개별 명세서 다운로드 (Export to Excel)
+        
+        Returns:
+            다운로드 성공 여부
+        """
         try:
             logger.info(f"명세서 다운로드: {remittance.payout_id} ({remittance.amount:,.0f} {remittance.currency})")
             
@@ -320,12 +324,12 @@ class AgodaDownloader:
                 date_str = remittance.date.replace('-', '')
             
             amount_int = int(remittance.amount)
-            filename = f"아고다_{amount_int}_{date_str}.csv"
-            expected_file = self.download_dir / filename
+            target_filename = f"아고다_{date_str}_{amount_int}.csv"
+            target_file = self.download_dir / target_filename
             
             # 이미 존재하면 스킵
-            if expected_file.exists():
-                logger.info(f"파일 이미 존재: {filename}")
+            if target_file.exists():
+                logger.info(f"파일 이미 존재: {target_filename}")
                 return False
             
             # 행을 클릭해서 상세 페이지 열기
@@ -342,30 +346,54 @@ class AgodaDownloader:
             self.driver.execute_script("arguments[0].scrollIntoView(true);", export_button)
             time.sleep(1)
             
+            # 현재 파일 개수 기록 (다운로드된 새 파일 감지용)
+            existing_files_before = set(self.download_dir.glob('Remittances*.xlsx'))
+            
             # 버튼 클릭
             export_button.click()
             
             # 파일 다운로드 대기
             time.sleep(3)
             max_wait = 10
+            downloaded_file = None
+            
             while max_wait > 0:
-                if expected_file.exists():
-                    logger.info(f"파일 다운로드 완료: {filename}")
-                    return True
+                # 새로 생성된 파일이 있는지 확인
+                current_files = set(self.download_dir.glob('Remittances*.xlsx'))
+                new_files = current_files - existing_files_before
+                if new_files:
+                    downloaded_file = max(new_files, key=lambda p: p.stat().st_mtime)
+                    logger.info(f"다운로드된 파일: {downloaded_file.name}")
+                    break
+                
                 time.sleep(1)
                 max_wait -= 1
             
-            # 파일 검색 (정확한 이름이 다를 수 있음)
-            csv_files = list(self.download_dir.glob('*.csv'))
-            if csv_files:
-                latest_file = max(csv_files, key=lambda p: p.stat().st_mtime)
-                # 최근 생성된 파일이 우리 파일일 가능성이 높음
-                if (datetime.now() - datetime.fromtimestamp(latest_file.stat().st_mtime)).seconds < 10:
-                    logger.info(f"다운로드된 파일: {latest_file.name}")
-                    return True
+            if not downloaded_file:
+                logger.warning(f"파일 다운로드 타임아웃: {target_filename}")
+                return False
             
-            logger.warning(f"파일 다운로드 타임아웃: {filename}")
-            return False
+            # xlsx 파일을 csv로 변환하고 이름 변경
+            try:
+                import pandas as pd
+                df = pd.read_excel(downloaded_file)
+                df.to_csv(target_file, index=False, encoding='utf-8-sig')
+                logger.info(f"CSV 변환 완료: {target_filename}")
+                
+                # 원본 xlsx 파일 삭제
+                downloaded_file.unlink()
+                return True
+            except Exception as e:
+                logger.error(f"CSV 변환 실패: {e}")
+                # 변환 실패해도 xlsx 파일을 원하는 이름으로 변경
+                try:
+                    xlsx_target = self.download_dir / target_filename.replace('.csv', '.xlsx')
+                    downloaded_file.rename(xlsx_target)
+                    logger.info(f"파일 이름 변경: {xlsx_target.name}")
+                    return True
+                except Exception as rename_err:
+                    logger.error(f"파일 이름 변경 실패: {rename_err}")
+                    return False
             
         except Exception as e:
             logger.error(f"명세서 다운로드 실패: {remittance.payout_id} - {e}")
@@ -381,7 +409,7 @@ class AgodaDownloader:
             end_date: 종료 날짜 (YYYY-MM-DD 형식, 기본값: 오늘)
         
         Returns:
-            다운로드된 명세서 목록
+            조회된 명세서 목록 (다운로드 성공 여부와 관계없이)
         """
         try:
             # 기본값: 1년 범위
@@ -412,23 +440,62 @@ class AgodaDownloader:
             remittances = filtered
             logger.info(f"필터링된 명세서: {len(remittances)}개")
             
-            # 개별 다운로드
-            downloaded = []
-            for remittance in remittances:
-                if self.download_remittance(remittance):
-                    downloaded.append(remittance)
+            # 엑셀에 있지만 파일이 없는 명세서만 다운로드
+            excel_path = self.base_dir / '매출 및 입금 결과.xlsx'
+            if excel_path.exists():
+                try:
+                    wb_check = load_workbook(excel_path, read_only=True)
+                    if '아고다' in wb_check.sheetnames:
+                        ws_check = wb_check['아고다']
+                        excel_records = set()
+                        for row in ws_check.iter_rows(min_row=2, values_only=True):
+                            if row[0] and row[1]:  # 날짜, 금액
+                                date_str = str(row[0]).replace('-', '')
+                                amount_str = str(row[1]).replace(',', '').replace('.0', '').strip()
+                                excel_records.add(f"{date_str}_{amount_str}")
+                        wb_check.close()
+                        
+                        # 실제 파일 확인
+                        existing_files = set()
+                        for f in self.download_dir.glob('아고다_*.csv'):
+                            parts = f.stem.split('_')
+                            if len(parts) >= 3:
+                                existing_files.add(f"{parts[1]}_{parts[2]}")
+                        
+                        # 엑셀에는 있지만 파일이 없는 항목 필터링
+                        missing_records = excel_records - existing_files
+                        if missing_records:
+                            logger.info(f"엑셀에 있지만 파일이 없는 명세서: {len(missing_records)}개")
+                            remittances_to_download = []
+                            for r in remittances:
+                                date_obj = datetime.strptime(r.date, '%d-%b-%Y')
+                                date_str = date_obj.strftime('%Y%m%d')
+                                amount_int = int(r.amount)
+                                key = f"{date_str}_{amount_int}"
+                                if key in missing_records:
+                                    remittances_to_download.append(r)
+                            remittances = remittances_to_download
+                            logger.info(f"다운로드 대상(엑셀 기반): {len(remittances)}개")
+                except Exception as e:
+                    logger.warning(f"엑셀 필터링 실패, 전체 다운로드: {e}")
             
-            return downloaded
+            # 개별 다운로드
+            for remittance in remittances:
+                self.download_remittance(remittance)
+            
+            # 조회된 명세서 모두 반환 (Excel 업데이트용)
+            return remittances
             
         except Exception as e:
             logger.error(f"명세서 다운로드 실패: {e}")
             raise
     
     def _update_excel_with_remittances(self, remittances: List[RemittanceRecord]):
-        """Excel 파일에 명세서 업데이트"""
+        """Excel 파일에 명세서 업데이트 (CSV 다운로드 여부와 관계없이)"""
         try:
             excel_path = self.base_dir / '매출 및 입금 결과.xlsx'
             logger.info(f"Excel 파일 업데이트: {excel_path}")
+            logger.info(f"업데이트할 명세서: {len(remittances)}개")
             
             # Excel 파일 로드 또는 생성
             if excel_path.exists():
@@ -446,16 +513,19 @@ class AgodaDownloader:
                 ws = wb[sheet_name]
             else:
                 ws = wb.create_sheet(sheet_name)
-                # 헤더 작성
-                headers = ['요청날짜', '처리금액', '지불ID']
-                for col, header in enumerate(headers, 1):
-                    ws.cell(row=1, column=col, value=header)
             
-            # 기존 데이터 읽기 (중복 제거용)
+            # 헤더 확인 및 설정 (항상 1행에)
+            if ws.cell(row=1, column=1).value != '요청날짜':
+                ws.cell(row=1, column=1, value='요청날짜')
+                ws.cell(row=1, column=2, value='처리금액')
+                ws.cell(row=1, column=3, value='지불ID')
+            
+            # 기존 데이터 읽기 (중복 제거용) - 2행부터 시작
             existing_payout_ids = set()
-            for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=3, max_col=3):
-                if row[0].value:
-                    existing_payout_ids.add(str(row[0].value))
+            for row_idx in range(2, ws.max_row + 1):
+                payout_id = ws.cell(row=row_idx, column=3).value
+                if payout_id:
+                    existing_payout_ids.add(str(payout_id))
             
             logger.info(f"기존 지불ID: {len(existing_payout_ids)}개")
             
@@ -470,22 +540,45 @@ class AgodaDownloader:
                     except ValueError:
                         date_str = remittance.date
                     
-                    # 금액을 쉼표 형식으로 표시
-                    amount_formatted = f"{remittance.amount:,}"
+                    # 금액을 정수로 표시 (소수점 제거, 쉼표 구분자 추가)
+                    amount_int = int(remittance.amount)
+                    amount_formatted = f"{amount_int:,}"
                     
-                    # 새 행 추가
+                    # 새 행 추가 (2행부터 시작)
                     new_row = ws.max_row + 1
+                    if new_row == 1:  # 비어있으면 헤더 다음
+                        new_row = 2
+                    
                     ws.cell(row=new_row, column=1, value=date_str)
                     ws.cell(row=new_row, column=2, value=amount_formatted)
                     ws.cell(row=new_row, column=3, value=remittance.payout_id)
                     
                     added_count += 1
+                    logger.info(f"  추가: {remittance.payout_id} - {amount_int:,} KRW ({date_str})")
             
             logger.info(f"추가된 명세서: {added_count}개")
             
+            # 요청날짜로 정렬 (최근 날짜 먼저, 헤더 제외)
+            if ws.max_row > 1:
+                data_rows = []
+                for row in ws.iter_rows(min_row=2, max_row=ws.max_row, values_only=True):
+                    data_rows.append(list(row))
+                
+                # 요청날짜(A열, 인덱스 0) 기준 내림차순 정렬
+                data_rows.sort(key=lambda x: x[0] if x[0] else '', reverse=True)
+                
+                # 기존 데이터 삭제 (헤더 제외)
+                ws.delete_rows(2, ws.max_row - 1)
+                
+                # 정렬된 데이터 다시 추가
+                for row_data in data_rows:
+                    ws.append(row_data)
+                
+                logger.info(f"정렬 완료: 요청날짜 기준 최근순")
+            
             # 파일 저장
             wb.save(excel_path)
-            logger.info(f"Excel 파일 업데이트 완료: {added_count}개 추가")
+            logger.info(f"Excel 파일 업데이트 완료: {excel_path}")
             
         except Exception as e:
             logger.error(f"Excel 파일 업데이트 실패: {e}")

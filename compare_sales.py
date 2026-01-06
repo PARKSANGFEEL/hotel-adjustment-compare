@@ -107,15 +107,26 @@ col_ota_no = find_col(df_all.columns, 'OTA')
 if col_ota_no:
     df_all[col_ota_no] = df_all[col_ota_no].astype(str).str.replace('.0', '', regex=False).str.strip()
 
-# Remittances로 시작하는 파일 목록
-ota_files = [f for f in os.listdir(directory_ota) if f.startswith('Remittances') and f.endswith('.xlsx')]
+# 아고다 파일 목록 (기존 Remittances 엑셀 + 새 아고다 CSV 모두 지원)
+agoda_xlsx_files = [f for f in os.listdir(directory_ota) if f.startswith('Remittances') and f.endswith('.xlsx')]
+agoda_csv_files = [f for f in os.listdir(directory_ota) if f.startswith('아고다_') and f.endswith('.csv')]
 
 # 아고다 매출 데이터 통합
 df_ota = pd.DataFrame()
-for file in ota_files:
+for file in agoda_xlsx_files:
     path = os.path.join(directory_ota, file)
-    temp_df = pd.read_excel(path)
-    df_ota = pd.concat([df_ota, temp_df], ignore_index=True)
+    try:
+        temp_df = pd.read_excel(path)
+        df_ota = pd.concat([df_ota, temp_df], ignore_index=True)
+    except Exception as e:
+        print(f"[WARN] 아고다 엑셀 읽기 실패: {file} - {e}")
+for file in agoda_csv_files:
+    path = os.path.join(directory_ota, file)
+    try:
+        temp_df = pd.read_csv(path)
+        df_ota = pd.concat([df_ota, temp_df], ignore_index=True)
+    except Exception as e:
+        print(f"[WARN] 아고다 CSV 읽기 실패: {file} - {e}")
 
 # 부킹 CSV 파일 읽기
 booking_files = [f for f in os.listdir(directory_ota) if f.startswith('부킹') and f.endswith('.csv')]
@@ -167,14 +178,23 @@ col_ota_no = find_col(df_all.columns, 'OTA')
 # print(f"[DEBUG] 컬럼명 매핑: 고객명={col_name_all}, 객실료={col_price_all_1}, 합계={col_price_all_2}, 거래처={col_vendor}, OTA번호={col_ota_no}")
 """
 
-# Remittances 엑셀의 이름, 금액 컬럼명 추정 (수정 필요시 아래 변수명 변경)
-# 이름 컬럼: 4번째 컬럼(D열)
-col_name_ota = df_ota.columns[3]
-# 금액 컬럼: Remittances의 G열, H열 등 여러 컬럼을 모두 비교
-ota_price_cols = [col for col in df_ota.columns if any(x in col for x in ['금액', 'Amount', '금액', '금액', '금액']) or col in ['G', 'H'] or col.startswith('Unnamed')]
+# Remittances/아고다 데이터의 이름, 금액 컬럼 추정 (유연 처리)
+# 이름 컬럼: 기본 4번째(D열), 부족하면 첫 번째 컬럼 사용
+if df_ota.shape[1] >= 4:
+    col_name_ota = df_ota.columns[3]
+elif df_ota.shape[1] >= 1:
+    col_name_ota = df_ota.columns[0]
+else:
+    col_name_ota = None
+
+# 금액 컬럼: '금액'/'Amount' 등의 키워드 기반 탐색
+ota_price_cols = [col for col in df_ota.columns if any(x in str(col) for x in ['금액', 'Amount', 'amount', 'AMOUNT']) or str(col) in ['G', 'H'] or str(col).startswith('Unnamed')]
 if not ota_price_cols:
-    # Remittances의 7,8번째 컬럼(G,H열)로 강제 지정
-    ota_price_cols = [df_ota.columns[6], df_ota.columns[7]]
+    # G,H 강제 지정은 컬럼이 충분할 때만
+    if df_ota.shape[1] >= 8:
+        ota_price_cols = [df_ota.columns[6], df_ota.columns[7]]
+    else:
+        ota_price_cols = []
 
 result_path = os.path.join(dir_base, '매출_검토_결과.xlsx')
 wb = load_workbook(result_path)
@@ -185,16 +205,21 @@ if '비교로그' in wb.sheetnames:
 log_ws = wb.create_sheet('비교로그')
 log_ws.append(['고객명', '전체매출 행번호', '전체매출 가격', '파일명', '행번호', '비교 가격', '원가격'])
 
-# Remittances 파일별 행 오프셋 기록비교 가격
+# Remittances/아고다 파일별 행 오프셋 기록 (비교 로그용)
 ota_file_map = []  # (파일명, 데이터프레임, 시작행)
 ota_row_offset = 0
 df_ota = pd.DataFrame()
-for file in ota_files:
+
+agoda_all_files = [(f, 'xlsx') for f in agoda_xlsx_files] + [(f, 'csv') for f in agoda_csv_files]
+for file, ftype in agoda_all_files:
     path = os.path.join(directory_ota, file)
-    temp_df = pd.read_excel(path)
-    ota_file_map.append((file, temp_df, ota_row_offset))
-    ota_row_offset += len(temp_df)
-    df_ota = pd.concat([df_ota, temp_df], ignore_index=True)
+    try:
+        temp_df = pd.read_excel(path) if ftype == 'xlsx' else pd.read_csv(path)
+        ota_file_map.append((file, temp_df, ota_row_offset))
+        ota_row_offset += len(temp_df)
+        df_ota = pd.concat([df_ota, temp_df], ignore_index=True)
+    except Exception as e:
+        print(f"[WARN] 아고다 파일 로드 실패: {file} - {e}")
 
 # 색상 스타일 정의
 fill_yellow = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
