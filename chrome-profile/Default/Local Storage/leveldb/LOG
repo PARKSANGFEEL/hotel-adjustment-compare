@@ -1,0 +1,8 @@
+2026/01/04-21:15:44.180 7cb8 Creating DB C:\Users\HP\Desktop\hotel-code\hotel-adjustment-compare\chrome-profile\Default\Local Storage\leveldb since it was missing.
+2026/01/04-21:15:44.248 7cb8 Reusing MANIFEST C:\Users\HP\Desktop\hotel-code\hotel-adjustment-compare\chrome-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/01/04-21:19:44.869 2980 Level-0 table #5: started
+2026/01/04-21:19:44.881 2980 Level-0 table #5: 24881 bytes OK
+2026/01/04-21:19:44.888 2980 Delete type=0 #3
+2026/01/04-22:06:44.875 7cb8 Level-0 table #7: started
+2026/01/04-22:06:44.885 7cb8 Level-0 table #7: 22099 bytes OK
+2026/01/04-22:06:44.891 7cb8 Delete type=0 #4

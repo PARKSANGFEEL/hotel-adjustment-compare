@@ -1,0 +1,131 @@
+Type,"Reference number",Check-in,Checkout,"Guest name","Reservation status",Currency,"Payment status",Amount,"Payout date","Payout ID"
+Reservation,6795403445,"30 Dec 2025","1 Jan 2026","sergio riccardi",ok,KRW,"Paid Online",387000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6791106341,"31 Dec 2025","1 Jan 2026","Nicky Bak",ok,KRW,"Paid Online",234000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5433993419,"31 Dec 2025","1 Jan 2026","Jang Hanna",ok,KRW,"Paid Online",189000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6581972836,"28 Dec 2025","31 Dec 2025","Michael cheung",ok,KRW,"Paid Online",486000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6522201160,"25 Dec 2025","31 Dec 2025","Ma Reysa CENINA",ok,KRW,"Paid Online",2169000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6473819593,"25 Dec 2025","31 Dec 2025","Lorenzo Venturini",ok,KRW,"Paid Online",846000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6445920521,"27 Dec 2025","31 Dec 2025","LIANG YI CHEN",ok,KRW,"Paid Online",801900,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5842595525,"28 Dec 2025","31 Dec 2025","Jose Luis Verde Henandez",ok,KRW,"Paid Online",648000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5817787835,"30 Dec 2025","31 Dec 2025","MAEDA SATOSHI",ok,KRW,"Paid Online",243000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5878836194,"28 Dec 2025","30 Dec 2025","NONOKA AIDA",ok,KRW,"Paid Online",324000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5864639999,"28 Dec 2025","30 Dec 2025","Andrei Akterskii",ok,KRW,"Paid Online",360000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5224319980,"27 Dec 2025","30 Dec 2025","Ai Kozaki",ok,KRW,"Paid Online",387000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6577978910,"27 Dec 2025","29 Dec 2025","yukadong Komura",ok,KRW,"Paid Online",459000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6144288861,"26 Dec 2025","29 Dec 2025","NAOMI SHIMIZU",ok,KRW,"Paid Online",549000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6052307354,"26 Dec 2025","29 Dec 2025","Toru YAMASAKI",ok,KRW,"Paid Online",558000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5843688780,"26 Dec 2025","29 Dec 2025","ASUTA SHIGA",ok,KRW,"Paid Online",612000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5467076099,"27 Dec 2025","29 Dec 2025","Hei Ting Shek",ok,KRW,"Paid Online",261000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5460928402,"28 Dec 2025","29 Dec 2025","TOMOKO OISHI",ok,KRW,"Paid Online",162000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5079682001,"26 Dec 2025","29 Dec 2025","JEN CHEN",ok,KRW,"Paid Online",858600,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6659659759,"27 Dec 2025","28 Dec 2025","Maya Kawahara",no_show,KRW,"Paid Online",135000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5878089959,"25 Dec 2025","28 Dec 2025","Jason Yim",ok,KRW,"Paid Online",1080000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5274149561,"27 Dec 2025","28 Dec 2025","Bang Junhyeok",ok,KRW,"Paid Online",198000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6849665760,"26 Dec 2025","27 Dec 2025","JUNG MIN CHOI",ok,KRW,"Paid Online",153000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6741498742,"24 Dec 2025","27 Dec 2025","Leah Antoinette Olaso",ok,KRW,"Paid Online",414000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6678950251,"26 Dec 2025","27 Dec 2025","Pranav Maddula",ok,KRW,"Paid Online",135000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6374470846,"25 Dec 2025","27 Dec 2025","KAHO SHIBATA",ok,KRW,"Paid Online",261000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5479001886,"26 Dec 2025","27 Dec 2025","KA WING HO",ok,KRW,"Paid Online",198000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5195304347,"25 Dec 2025","27 Dec 2025","Hiromi Takeyasu",ok,KRW,"Paid Online",261000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5099067960,"25 Dec 2025","27 Dec 2025","Ambra Uncini",ok,KRW,"Paid Online",441000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5975756361,"25 Dec 2025","26 Dec 2025","HIROE KUWANA",ok,KRW,"Paid Online",135000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5882185019,"22 Dec 2025","26 Dec 2025","Tarek Bakhos",ok,KRW,"Paid Online",459000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5457481220,"23 Dec 2025","26 Dec 2025","KUN-HUNG LIN",ok,KRW,"Paid Online",504000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5391381846,"24 Dec 2025","26 Dec 2025","AYAKA KUROKI",ok,KRW,"Paid Online",288000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5232005643,"23 Dec 2025","26 Dec 2025","YU-WEI YU",ok,KRW,"Paid Online",369000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6431178363,"20 Dec 2025","25 Dec 2025","æé ç®",ok,KRW,"Paid Online",1620000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6279793568,"23 Dec 2025","25 Dec 2025","MIU YAMAZAKI",ok,KRW,"Paid Online",252000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6094482033,"22 Dec 2025","25 Dec 2025","Soufian Hanifi",ok,KRW,"Paid Online",518400,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5188951549,"23 Dec 2025","25 Dec 2025","Marc Treiber",ok,KRW,"Paid Online",297000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5114067984,"19 Dec 2025","24 Dec 2025","Silvia Reda",ok,KRW,"Paid Online",510300,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6499691362,"22 Dec 2025","23 Dec 2025","ji young park",ok,KRW,"Paid Online",99000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6469229297,"21 Dec 2025","23 Dec 2025","cheyenne thomas",ok,KRW,"Paid Online",288000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5598087897,"21 Dec 2025","23 Dec 2025","cheyenne thomas",ok,KRW,"Paid Online",306000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,4623110535,"19 Dec 2025","23 Dec 2025","Dany Chevalier",ok,KRW,"Paid Online",468000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6657161576,"19 Dec 2025","22 Dec 2025","MOMOKA SAKAYORI",ok,KRW,"Paid Online",494100,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6628149010,"18 Dec 2025","22 Dec 2025","Cristina Mantek",ok,KRW,"Paid Online",432000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6441791183,"20 Dec 2025","22 Dec 2025","Yui Fujita",ok,KRW,"Paid Online",333000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5411893407,"19 Dec 2025","22 Dec 2025","Sayuri Yoshioka",ok,KRW,"Paid Online",342000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5256289494,"20 Dec 2025","22 Dec 2025","Rosalita Rosenberg",ok,KRW,"Paid Online",378000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5189906987,"18 Dec 2025","22 Dec 2025","Arthur Bilski",ok,KRW,"Paid Online",672300,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6330705078,"20 Dec 2025","21 Dec 2025","Yi Jen Wang",ok,KRW,"Paid Online",135000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6149680076,"19 Dec 2025","21 Dec 2025","Arissa Murata",ok,KRW,"Paid Online",306000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5668048432,"20 Dec 2025","21 Dec 2025","KIM SEOK YOON",ok,KRW,"Paid Online",198000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5594273425,"20 Dec 2025","21 Dec 2025","soomin kim",ok,KRW,"Paid Online",198000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5543908050,"20 Dec 2025","21 Dec 2025","çç äºå·",ok,KRW,"Paid Online",135000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5378312020,"20 Dec 2025","21 Dec 2025","Theng Tiak Tan",ok,KRW,"Paid Online",135000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6417183190,"17 Dec 2025","20 Dec 2025","HSIN WANG",ok,KRW,"Paid Online",283500,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5952900912,"17 Dec 2025","20 Dec 2025","Xiangting Hong",ok,KRW,"Paid Online",522000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6111880431,"15 Dec 2025","19 Dec 2025","Miki Shibata",ok,KRW,"Paid Online",360000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5311568829,"16 Dec 2025","19 Dec 2025","Hector Galvan Garcia",ok,KRW,"Paid Online",297000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6951712216,"16 Dec 2025","18 Dec 2025","miura shoko",ok,KRW,"Paid Online",162000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6144746035,"13 Dec 2025","18 Dec 2025","Hector Orellana",ok,KRW,"Paid Online",441000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5838936328,"17 Dec 2025","18 Dec 2025","MIKAKO KATAO",ok,KRW,"Paid Online",81000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5263024884,"15 Dec 2025","18 Dec 2025","Yuto Aoyama",ok,KRW,"Paid Online",364500,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5986214492,"15 Dec 2025","17 Dec 2025","Hyepin Kim",ok,KRW,"Paid Online",234000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5216768399,"16 Dec 2025","17 Dec 2025","SHOKO ODA",ok,KRW,"Paid Online",180000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6844286141,"7 Dec 2025","16 Dec 2025","Chiara Francesca Katharina Klingler",ok,KRW,"Paid Online",1089000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5835857196,"12 Dec 2025","16 Dec 2025","LO WEN WEI",ok,KRW,"Paid Online",585000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5555074815,"12 Dec 2025","16 Dec 2025","Suwako Yajima",ok,KRW,"Paid Online",680400,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5519272210,"14 Dec 2025","16 Dec 2025","Chia Ye Goh",ok,KRW,"Paid Online",180000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5326904557,"14 Dec 2025","16 Dec 2025","chang yu chen",ok,KRW,"Paid Online",198000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6528438844,"14 Dec 2025","15 Dec 2025","JI YEONG EUN",ok,KRW,"Paid Online",90000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6290145463,"12 Dec 2025","15 Dec 2025","Rafael Lino Facanha Soler",ok,KRW,"Paid Online",333000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6123972845,"13 Dec 2025","15 Dec 2025","Kaede Komoda",ok,KRW,"Paid Online",306000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5864974405,"11 Dec 2025","15 Dec 2025","HIROMASA TODA",ok,KRW,"Paid Online",639900,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5379087287,"13 Dec 2025","15 Dec 2025","MIWA KATAOKA",ok,KRW,"Paid Online",756000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5331864611,"11 Dec 2025","15 Dec 2025","KAI-PO HUANG",ok,KRW,"Paid Online",534600,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5130290680,"11 Dec 2025","15 Dec 2025","Yoriko Ito",ok,KRW,"Paid Online",315900,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6886020561,"12 Dec 2025","14 Dec 2025","ä¾çYishan è¡Cai",ok,KRW,"Paid Online",369000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6204104511,"10 Dec 2025","14 Dec 2025","sharon gun",ok,KRW,"Paid Online",549000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5981907087,"13 Dec 2025","14 Dec 2025","OISHI KANAE",ok,KRW,"Paid Online",198000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5843688453,"13 Dec 2025","14 Dec 2025","Ayako Nanaho",ok,KRW,"Paid Online",216000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6502172417,"10 Dec 2025","13 Dec 2025","Kazuyuki Senda",ok,KRW,"Paid Online",486000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6195623574,"9 Dec 2025","13 Dec 2025","Anna Jardon Prat",ok,KRW,"Paid Online",380700,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6129546879,"9 Dec 2025","13 Dec 2025","CHIA LING CHEN",ok,KRW,"Paid Online",396000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6054515305,"11 Dec 2025","13 Dec 2025","AIKA TANAKA",ok,KRW,"Paid Online",234000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5992092354,"12 Dec 2025","13 Dec 2025","Evan Lee",ok,KRW,"Paid Online",378000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5470871724,"10 Dec 2025","13 Dec 2025","nanako shimakura",ok,KRW,"Paid Online",380700,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5409319809,"9 Dec 2025","13 Dec 2025","RYAN WONG",ok,KRW,"Paid Online",380700,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5165131048,"12 Dec 2025","13 Dec 2025","saki hiroi",cancelled,KRW,"Paid Online",135000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5157758148,"10 Dec 2025","13 Dec 2025","Sho Asanuma",ok,KRW,"Paid Online",356400,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6077773430,"8 Dec 2025","12 Dec 2025","NGA HEI LAU",ok,KRW,"Paid Online",356400,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6065875053,"11 Dec 2025","12 Dec 2025","sungwon Jung",ok,KRW,"Paid Online",108000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5267138858,"10 Dec 2025","12 Dec 2025","SHINGO SONODA",ok,KRW,"Paid Online",198000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6586309582,"6 Dec 2025","11 Dec 2025","Diane Chan",ok,KRW,"Paid Online",738000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5878873865,"7 Dec 2025","11 Dec 2025","Samuel Francavilla",ok,KRW,"Paid Online",356400,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5513965403,"9 Dec 2025","11 Dec 2025","fuyumi niwa",ok,KRW,"Paid Online",216000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6545659266,"6 Dec 2025","10 Dec 2025","Joseph Robbins",ok,KRW,"Paid Online",522000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5513748118,"6 Dec 2025","10 Dec 2025","YUK SIN CHAN",ok,KRW,"Paid Online",396000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5480069073,"5 Dec 2025","10 Dec 2025","Aleksandra Å»uchowska",ok,KRW,"Paid Online",540000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5305595475,"7 Dec 2025","10 Dec 2025","Shunji Matsumoto",ok,KRW,"Paid Online",267300,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6396196045,"5 Dec 2025","9 Dec 2025","Nur Efikah Sukeman",ok,KRW,"Paid Online",583200,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6215488870,"6 Dec 2025","9 Dec 2025","Jose Manuel Moron Marchena",ok,KRW,"Paid Online",450000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6127404494,"3 Dec 2025","9 Dec 2025","Max Zhou",ok,KRW,"Paid Online",945000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5904978614,"7 Dec 2025","9 Dec 2025","Ryan Yee",ok,KRW,"Paid Online",540000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5262567782,"6 Dec 2025","9 Dec 2025","Jess Chen",ok,KRW,"Paid Online",291600,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5232562564,"6 Dec 2025","9 Dec 2025","WONG SZE WING",ok,KRW,"Paid Online",306000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6670434223,"3 Dec 2025","8 Dec 2025","Urusha Lama",ok,KRW,"Paid Online",1503000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6413872963,"5 Dec 2025","8 Dec 2025","maeda aguri",ok,KRW,"Paid Online",461700,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5185546344,"6 Dec 2025","8 Dec 2025","TSUYOKI NISHIO",ok,KRW,"Paid Online",279000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5040182692,"6 Dec 2025","8 Dec 2025","kai ogoe",ok,KRW,"Paid Online",315000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5732277595,"3 Dec 2025","7 Dec 2025","Sharon Rosalind",ok,KRW,"Paid Online",1026000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5686996005,"4 Dec 2025","7 Dec 2025","TAMAMI TSUCHIYA",ok,KRW,"Paid Online",441000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6196068527,"3 Dec 2025","6 Dec 2025","Hajime Sakurai",ok,KRW,"Paid Online",291600,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5925699344,"5 Dec 2025","6 Dec 2025","KUAN CHEOK KEI",ok,KRW,"Paid Online",126000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5925007957,"2 Dec 2025","6 Dec 2025","Leek Boon Kee",ok,KRW,"Paid Online",1485000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5894197830,"3 Dec 2025","6 Dec 2025","Janice Mallari",ok,KRW,"Paid Online",453600,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5867936999,"5 Dec 2025","6 Dec 2025","MORIYAMA KANAE",ok,KRW,"Paid Online",234000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5328226012,"3 Dec 2025","6 Dec 2025","CIAN TAI WEI",ok,KRW,"Paid Online",388800,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5040899485,"5 Dec 2025","6 Dec 2025","ji young park",ok,KRW,"Paid Online",180000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,4966413561,"3 Dec 2025","6 Dec 2025","MIKI AOKI",ok,KRW,"Paid Online",270000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,4730405555,"3 Dec 2025","6 Dec 2025","Hiroko Uchida",ok,KRW,"Paid Online",270000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,4295837851,"3 Dec 2025","6 Dec 2025","YUKO ARAI",ok,KRW,"Paid Online",270000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6433725392,"4 Dec 2025","5 Dec 2025","AKIKO KAWAMURA",ok,KRW,"Paid Online",99000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5332358856,"30 Nov 2025","5 Dec 2025","Sergey Ryazantsev",cancelled,KRW,"Paid Online",105300,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6113007619,"1 Dec 2025","4 Dec 2025","DIANNE APRIL Yu",ok,KRW,"Paid Online",461700,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,4839449523,"30 Nov 2025","4 Dec 2025","David Cutlip",ok,KRW,"Paid Online",360000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6755712627,"25 Nov 2025","2 Dec 2025","Mariana Flores",ok,KRW,"Paid Online",648000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6714144028,"28 Nov 2025","2 Dec 2025","å©å é­",ok,KRW,"Paid Online",1134000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,6017935768,"1 Dec 2025","2 Dec 2025","Shih-Hao Wang",ok,KRW,"Paid Online",108000,"1 Jan 2026",XESZjHzOwnGL2z6v
+Reservation,5985311249,"29 Nov 2025","2 Dec 2025","Melson Bolongaita",ok,KRW,"Paid Online",396000,"1 Jan 2026",XESZjHzOwnGL2z6v
