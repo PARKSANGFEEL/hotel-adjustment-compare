@@ -13,6 +13,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Optional
 from dataclasses import dataclass
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -22,6 +23,9 @@ from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
+
+# .env 파일 로드
+load_dotenv()
 
 
 # 로깅 설정
@@ -405,22 +409,37 @@ class AgodaDownloader:
         기본값: 지난 1년치 데이터만 다운로드
         
         Args:
-            start_date: 시작 날짜 (YYYY-MM-DD 형식, 기본값: 1년 전)
+            start_date: 시작 날짜 (YYYY-MM-DD 형식, 기본값: 오늘 - 1년)
             end_date: 종료 날짜 (YYYY-MM-DD 형식, 기본값: 오늘)
         
         Returns:
             조회된 명세서 목록 (다운로드 성공 여부와 관계없이)
         """
         try:
-            # 기본값: 1년 범위
-            if not start_date and not end_date:
-                end_date = datetime.now()
-                start_date = end_date.replace(year=end_date.year - 1)
-                start_date = start_date.strftime('%Y-%m-%d')
-                end_date = end_date.strftime('%Y-%m-%d')
-                logger.info(f"기본 범위: {start_date} ~ {end_date} (최근 1년)")
+            # 기본값: 과거 1년부터 오늘까지
+            if not start_date:
+                start_date_obj = datetime.now().replace(year=datetime.now().year - 1)
+                start_date = start_date_obj.strftime('%Y-%m-%d')
+            if not end_date:
+                end_date = datetime.now().strftime('%Y-%m-%d')
+            
+            logger.info(f"조회 범위: {start_date} ~ {end_date}")
             
             remittances = self.get_remittance_list()
+            
+            # 디버깅: 조회된 명세서의 날짜 범위 확인
+            if remittances:
+                dates = []
+                for r in remittances:
+                    try:
+                        r_date = datetime.strptime(r.date, '%d-%b-%Y')
+                        dates.append(r_date)
+                    except ValueError:
+                        pass
+                if dates:
+                    min_date = min(dates).strftime('%Y-%m-%d')
+                    max_date = max(dates).strftime('%Y-%m-%d')
+                    logger.info(f"조회된 명세서 날짜 범위: {min_date} ~ {max_date}")
             
             # 날짜 필터링
             filtered = []
@@ -438,7 +457,7 @@ class AgodaDownloader:
                     logger.warning(f"날짜 파싱 실패: {r.date}")
             
             remittances = filtered
-            logger.info(f"필터링된 명세서: {len(remittances)}개")
+            logger.info(f"필터링된 명세서: {len(remittances)}개 (필터: {start_date} ~ {end_date})")
             
             # 엑셀에 있지만 파일이 없는 명세서만 다운로드
             excel_path = self.base_dir / '매출 및 입금 결과.xlsx'
