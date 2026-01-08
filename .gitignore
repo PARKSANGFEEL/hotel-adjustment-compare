@@ -1,5 +1,4 @@
 # 엑셀 데이터 파일
-*.xlsx
 ~$*.xlsx
 
 # Python 캐시
@@ -15,6 +14,47 @@ ota-adjustment/*.pdf
 ota-adjustment/*.csv
 !ota-adjustment/부킹*.csv
 
-# 테스트 및 임시 파일
-*.txt
-!requirements.txt
+# 쿠키 파일 (민감 정보)
+*_cookies.json
+
+# Chrome 프로필 및 브라우저 데이터
+chrome-profile/
+ota-adjustment/Default/
+ota-adjustment/BrowserMetrics/
+ota-adjustment/Crashpad/
+ota-adjustment/CrashpadMetrics-active.pma
+ota-adjustment/GrShaderCache/
+ota-adjustment/GraphiteDawnCache/
+ota-adjustment/ShaderCache/
+ota-adjustment/component_crx_cache/
+ota-adjustment/extensions_crx_cache/
+ota-adjustment/optimization_guide_model_store/
+ota-adjustment/segmentation_platform/
+ota-adjustment/DevToolsActivePort
+ota-adjustment/First Run
+ota-adjustment/Last Browser
+ota-adjustment/Last Version
+ota-adjustment/Local State
+ota-adjustment/Variations
+ota-adjustment/*.db
+ota-adjustment/*.db-journal
+
+# 임시 다운로드
+temp_downloads/
+
+# 로그 파일
+*.log
+
+# 테스트 파일
+test_*.py
+
+# 디버그 및 임시 파일
+debug_*.html
+*_page_source.html
+*.png
+table_structure.html
+output.txt
+
+# Backup 파일
+*.broken
+*.bak
