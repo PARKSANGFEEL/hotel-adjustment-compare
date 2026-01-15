@@ -166,9 +166,13 @@ class ExpediaDownloader:
                 print("  [ERROR] 로그인 실패 (쿠키 인증 실패, 자격 증명 없음)")
                 return False
 
-            # 수동 로그인 미구현
-            print("  [ERROR] 로그인 실패 (수동 로그인 미구현)")
-            return False
+            # 자동 로그인 시도
+            if self.auto_login():
+                print("  [SUCCESS] 자동 로그인 성공")
+                return True
+            else:
+                print("  [ERROR] 로그인 실패 (자동 로그인 실패)")
+                return False
 
         except Exception as e:
             print(f"  [ERROR] 로그인 오류: {e}")
@@ -188,53 +192,9 @@ class ExpediaDownloader:
             print(f"[ERROR] 쿠키 저장 실패: {e}")
             return False
     
-        script = f"""
-        const target = '{invoice_id}'.replace(/\\D/g, '');
-        const debugTexts = [];
-        const rows = document.querySelectorAll('.fds-table tbody tr');
-
-        const collectDebug = (el) => {{
-            if (debugTexts.length < 15) {{ debugTexts.push((el.textContent || '').trim()); }}
-        }};
-
-        for (const row of rows) {{
-            const btn = row.querySelector('button');
-            if (btn) {{
-                const digits = (btn.textContent || '').replace(/\\D/g, '');
-                collectDebug(btn);
-                if (digits === target) {{ btn.click(); return {{ 'found': true, 'debugTexts': debugTexts }}; }}
-            }}
-
-            const anchors = row.querySelectorAll('a');
-            for (const a of anchors) {{
-                const digits = (a.textContent || '').replace(/\\D/g, '');
-                collectDebug(a);
-                if (digits === target) {{ a.click(); return {{ 'found': true, 'debugTexts': debugTexts }}; }}
-            }}
-
-            const spans = row.querySelectorAll('td[data-field-label], span, div');
-            for (const s of spans) {{
-                const digits = (s.textContent || '').replace(/\\D/g, '');
-                collectDebug(s);
-                if (digits === target) {{
-                    const clickable = s.closest('a, button') || s;
-                    clickable.click();
-                    return {{ 'found': true, 'debugTexts': debugTexts }};
-                }}
-            }}
-        }}
-
-        const allClickables = document.querySelectorAll('button, a');
-        for (const el of allClickables) {{
-            const digits = (el.textContent || '').replace(/\\D/g, '');
-            collectDebug(el);
-            if (digits === target) {{ el.click(); return {{ 'found': true, 'debugTexts': debugTexts }}; }}
-        }}
-
-        return {{ 'found': false, 'debugTexts': debugTexts }};
-        """
-        """수동 로그인 (2단계)"""
-        print("\n[수동 로그인] 시작...")
+    def auto_login(self):
+        """자동 로그인 (이메일 + 비밀번호)"""
+        print("\n[자동 로그인] 시작...")
         
         try:
             # 1단계: 이메일 입력
@@ -316,8 +276,8 @@ class ExpediaDownloader:
             print(f"  계속하기 버튼 클릭")
             
             # 2차 인증 처리 (필요한 경우)
-            print("\n[2차 인증] 확인 중...")
-            time.sleep(10)
+            print("\n[2차 인증] 휴대폰에서 2차 인증을 완료한 후 엔터를 누르세요...")
+            input()  # 사용자가 엔터를 누를 때까지 대기
             
             # 로그인 후 스크린샷
             after_screenshot = self.base_dir / 'after_login.png'
@@ -714,7 +674,7 @@ class ExpediaDownloader:
                     const disabled = el.disabled || el.getAttribute('aria-disabled') === 'true';
                     if (disabled) continue;
                     const hasIcon = el.querySelector('.fds-icon-name-arrow-forward-ios, .fds-icon-name-chevron-right, .fds-icon-name-arrow-forward, .fds-icon-name-arrow-right');
-                    const hasUse = el.querySelector('use[href*="arrow-forward"], use[xlink\:href*="arrow-forward"], use[href*="chevron-right"], use[xlink\:href*="chevron-right"]');
+                    const hasUse = el.querySelector('use[href*="arrow-forward"], use[xlink\\:href*="arrow-forward"], use[href*="chevron-right"], use[xlink\\:href*="chevron-right"]');
                     const aria = (el.getAttribute('aria-label') || '').toLowerCase();
                     if (hasIcon || hasUse || aria.includes('next') || aria.includes('다음')) {
                         el.click();

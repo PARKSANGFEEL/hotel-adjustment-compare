@@ -173,6 +173,7 @@ col_price_all_1 = find_col(df_all.columns, '객실')
 col_price_all_2 = find_col(df_all.columns, '합계')
 col_vendor = find_col(df_all.columns, '거래처')
 col_ota_no = find_col(df_all.columns, 'OTA')
+col_checkout = find_col(df_all.columns, '퇴실')  # 퇴실일자 컬럼
 
 """
 # print(f"[DEBUG] 컬럼명 매핑: 고객명={col_name_all}, 객실료={col_price_all_1}, 합계={col_price_all_2}, 거래처={col_vendor}, OTA번호={col_ota_no}")
@@ -416,10 +417,13 @@ for ref_no, rows in booking_grouped_by_ref.items():
     print(f"  부킹 데이터 가격: {booking_by_ref.get(ref_no, 'N/A')}")
     print(f"  부킹 데이터 가격: {booking_by_ref.get(ref_no, 'N/A')}")
     
-    if ref_no in booking_by_ref and round(total_price) == booking_by_ref[ref_no]:
-        found = True
-        used_booking_refs.add(ref_no)
-        print(f"  [OK] 예약번호 그룹 합산 매칭 성공! (전체고객목록 합계: {total_price} = 부킹 가격: {booking_by_ref[ref_no]})")
+    # 부킹 가격과 비교: 1) 0.82 곱한 값 또는 2) 원가격 그대로
+    if ref_no in booking_by_ref:
+        booking_price_orig = booking_by_ref[ref_no] / 0.82  # 역산하여 원가격 구함
+        if round(total_price) == booking_by_ref[ref_no] or round(total_price) == round(booking_price_orig):
+            found = True
+            used_booking_refs.add(ref_no)
+            print(f"  [OK] 예약번호 그룹 합산 매칭 성공! (전체고객목록 합계: {total_price} = 부킹 가격: {booking_by_ref[ref_no]})")
     
     if found:
         group_matched_count += 1
@@ -472,11 +476,28 @@ for name, rows in booking_grouped_rows.items():
         print(f"  행 {ws_row}: OTA번호={ota_no}, 가격={use_price}, 부킹매칭={len(booking_match)}건")
         
         if booking_match.empty:
-            print(f"    → 부킹 데이터에 예약번호 없음 (파란색 표시)")
+            # 퇴실일자 가져오기
+            checkout_date = ''
+            if col_checkout:
+                checkout_val = row.get(col_checkout, '')
+                if pd.notna(checkout_val):
+                    try:
+                        # 날짜 형식을 YY-MM-DD로 변환
+                        from datetime import datetime
+                        if isinstance(checkout_val, str):
+                            dt = pd.to_datetime(checkout_val)
+                        else:
+                            dt = checkout_val
+                        checkout_date = dt.strftime('%y-%m-%d')
+                    except:
+                        checkout_date = str(checkout_val)
+            
+            file_note = f'부킹닷컴 데이터 없음 ({checkout_date})' if checkout_date else '부킹닷컴 데이터 없음'
+            print(f"    → 부킹 데이터에 예약번호 없음 (파란색 표시) - 퇴실일자: {checkout_date}")
             for cell in ws[ws_row]:
                 cell.fill = fill_blue
             # 비교로그에 기록
-            log_ws.append([name, ws_row, use_price, '부킹닷컴 데이터 없음', '', '', ''])
+            log_ws.append([name, ws_row, use_price, file_note, '', '', ''])
             continue
         
         price_match = False
@@ -493,10 +514,12 @@ for name, rows in booking_grouped_rows.items():
                 
                 print(f"    부킹원가={booking_price}, 조정가격(×0.82)={booking_price_adjusted}, 비교={round(use_price)}")
                 
-                if round(use_price) == booking_price_adjusted:
+                # 조건: 0.82 곱한 값 또는 원가격 그대로 비교
+                if round(use_price) == booking_price_adjusted or round(use_price) == round(booking_price):
                     price_match = True
                     matched_booking_refs[ota_no] = matched_booking_refs.get(ota_no, 0) + 1
-                    print(f"    [OK] 개별 행 매칭 성공!")
+                    match_type = "×0.82" if round(use_price) == booking_price_adjusted else "원가격"
+                    print(f"    [OK] 개별 행 매칭 성공! (조건: {match_type})")
                     break
                 else:
                     if log_info is None:
@@ -571,12 +594,20 @@ for idx, row in df_all.iterrows():
     print(f"  행 {ws_row}: OTA번호={ota_no}, 가격={use_price}, 익스피디아매칭={len(expedia_match)}건")
     
     if expedia_match.empty:
+        # AB열(28번째 컬럼, 인덱스 27)에서 결제 관련 문구 확인
+        payment_note = ''
+        if len(df_all.columns) > 27:  # AB열이 존재하는지 확인
+            ab_col_value = str(row.iloc[27]).strip() if pd.notna(row.iloc[27]) else ''
+            if '결재' in ab_col_value or '결제' in ab_col_value:
+                payment_note = ' (현장결제)'
+        
+        file_note = f'익스피디아 데이터없음{payment_note}'
         # 익스피디아 CSV에 예약번호 없음 -> 파란색
-        print(f"    → 익스피디아 데이터에 예약번호 없음 (파란색 표시)")
+        print(f"    → 익스피디아 데이터에 예약번호 없음 (파란색 표시){payment_note}")
         for cell in ws[ws_row]:
             cell.fill = fill_blue
         # 비교로그에 기록
-        log_ws.append([name, ws_row, use_price, '익스피디아 데이터 없음', '', '', ''])
+        log_ws.append([name, ws_row, use_price, file_note, '', '', ''])
         expedia_notfound_count += 1
         continue
     
@@ -640,6 +671,52 @@ print(f"  ✅ 매칭 성공: {expedia_matched_count}건")
 print(f"  ❌ 가격 불일치: {expedia_mismatch_count}건")
 print(f"  🔵 예약번호 없음: {expedia_notfound_count}건")
 print("="*80)
+
+# 금액 컬럼을 숫자로 변환하고 천단위 구분 기호 적용
+print("\n[포맷팅] 금액 컬럼을 숫자로 변환하고 쉼표 적용 중...")
+from openpyxl.styles import numbers
+
+# 메인 시트의 금액 컬럼 포맷팅
+if col_price_all_1:
+    price_col_idx = list(df_all.columns).index(col_price_all_1) + 1
+    for row in range(2, ws.max_row + 1):
+        cell = ws.cell(row=row, column=price_col_idx)
+        if cell.value:
+            try:
+                # 문자열인 경우 쉼표 제거 후 숫자로 변환
+                if isinstance(cell.value, str):
+                    cell.value = float(cell.value.replace(',', '').strip())
+                cell.number_format = '#,##0'
+            except:
+                pass
+
+if col_price_all_2:
+    price_col_idx = list(df_all.columns).index(col_price_all_2) + 1
+    for row in range(2, ws.max_row + 1):
+        cell = ws.cell(row=row, column=price_col_idx)
+        if cell.value:
+            try:
+                # 문자열인 경우 쉼표 제거 후 숫자로 변환
+                if isinstance(cell.value, str):
+                    cell.value = float(cell.value.replace(',', '').strip())
+                cell.number_format = '#,##0'
+            except:
+                pass
+
+# 비교로그 시트의 금액 컬럼 포맷팅 (3열, 6열, 7열)
+for row in range(2, log_ws.max_row + 1):
+    for col_idx in [3, 6, 7]:  # 전체매출 가격, 비교 가격, 원가격
+        cell = log_ws.cell(row=row, column=col_idx)
+        if cell.value:
+            try:
+                # 문자열로 저장된 숫자를 숫자로 변환
+                if isinstance(cell.value, str):
+                    cell.value = float(cell.value.replace(',', ''))
+                cell.number_format = '#,##0'
+            except:
+                pass
+
+print("[포맷팅] 완료")
 
 # 결과 저장
 result_path = os.path.join(dir_base, '매출_검토_결과.xlsx')

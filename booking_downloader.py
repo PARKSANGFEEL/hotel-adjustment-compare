@@ -21,6 +21,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Tuple, Dict
 import pandas as pd
+from dotenv import load_dotenv
 from openpyxl import load_workbook, Workbook
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -38,6 +39,9 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# .env에서 환경변수 로드 (있으면)
+load_dotenv()
 
 
 class BookingDownloader:
